@@ -63,13 +63,19 @@ def gerar_payload_pix(valor, nome_recebedor, cidade_recebedor, chave_pix):
 # --- INTERFACE ---
 st.set_page_config(page_title="Inscrição SOESCA", page_icon="🎟️")
 
-# Inserindo a logo
-logo_bytes = carregar_logo()
-if logo_bytes:
-    # Mostra a logo centralizada e com tamanho controlado
-    st.image(logo_bytes, width=200, use_column_width=False)
-    # Adiciona um espaço para não grudar no título
-    st.write("---")
+# --- CONFIGURAÇÃO DA LOGO ---
+def carregar_logo():
+    try:
+        # Tenta carregar o arquivo local chamado 'logo.png'
+        with open("logo.png", "rb") as f:
+            return f.read()
+    except:
+        return None
+
+# No corpo do código:
+logo_data = carregar_logo()
+if logo_data:
+    st.image(logo_data, width=200)
 
 st.markdown("# 🎟️ Inscrição: Palestra SOESCA")
 st.markdown("### SOESCA - Cabo de Santo Agostinho")
