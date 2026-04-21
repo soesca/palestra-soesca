@@ -10,12 +10,11 @@ def salvar_na_planilha(nome, qtd, total):
     try:
         escopo = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
         
-        # Tenta ler das configurações seguras do Streamlit
+        # MUDANÇA REAL: Lê dos Secrets do Streamlit em vez do arquivo local
         if "google_sheets" in st.secrets:
             creds_info = st.secrets["google_sheets"]
             creds = ServiceAccountCredentials.from_json_keyfile_dict(dict(creds_info), escopo)
         else:
-            # Caso teste local
             creds = ServiceAccountCredentials.from_json_keyfile_name('credentials.json', escopo)
             
         cliente = gspread.authorize(creds)
@@ -23,7 +22,7 @@ def salvar_na_planilha(nome, qtd, total):
         planilha = cliente.open_by_key(ID_PLANILHA).sheet1
         
         data_hora = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
-        planilha.append_row([nome, qtd, data_hora, total])
+        planilha.append_row([nome, qtd, data_hora, str(total)])
         return True
     except Exception as e:
         st.error(f"Erro técnico: {e}")
@@ -46,7 +45,7 @@ if submit:
             if salvar_na_planilha(nome, qtd, total):
                 st.success("Inscrição registrada!")
                 st.write(f"### Total: R$ {total:.2f}")
-                img_qr = qrcode.make(f"Pix SOESCA - {nome} - R${total}")
+                img_qr = qrcode.make(f"Pix Palestra SOESCA - {nome} - R${total}")
                 buf = BytesIO()
                 img_qr.save(buf, format="PNG")
                 st.image(buf, width=300)
