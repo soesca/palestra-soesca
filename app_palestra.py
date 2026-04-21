@@ -5,12 +5,26 @@ from oauth2client.service_account import ServiceAccountCredentials
 from io import BytesIO
 from datetime import datetime
 
-# --- CONFIGURAÇÃO DO GOOGLE SHEETS ---
+# --- CONFIGURAÇÃO DO GOOGLE SHEETS (SEM ARQUIVO JSON) ---
 def salvar_na_planilha(nome, qtd, total):
     try:
         escopo = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-        creds_dict = dict(st.secrets["google_sheets"])
-        creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, escopo)
+        
+        # Lendo segredos individuais para evitar erros de Base64
+        info = {
+            "type": st.secrets["type"],
+            "project_id": st.secrets["project_id"],
+            "private_key_id": st.secrets["private_key_id"],
+            "private_key": st.secrets["private_key"].replace("\\n", "\n"),
+            "client_email": st.secrets["client_email"],
+            "client_id": st.secrets["client_id"],
+            "auth_uri": st.secrets["auth_uri"],
+            "token_uri": st.secrets["token_uri"],
+            "auth_provider_x509_cert_url": st.secrets["auth_provider_x509_cert_url"],
+            "client_x509_cert_url": st.secrets["client_x509_cert_url"]
+        }
+        
+        creds = ServiceAccountCredentials.from_json_keyfile_dict(info, escopo)
         cliente = gspread.authorize(creds)
         ID_PLANILHA = "1NHL4ihthnYOe_xDOGTmfLQ-I5FuyomWdTkkQbLRKKNs"
         planilha = cliente.open_by_key(ID_PLANILHA).sheet1
@@ -19,25 +33,20 @@ def salvar_na_planilha(nome, qtd, total):
         planilha.append_row([nome, qtd, data_hora, f"R$ {total:.2f}"])
         return True
     except Exception as e:
-        st.error(f"Erro de conexão: {e}")
+        st.error(f"Erro técnico: {e}")
         return False
 
-# --- FUNÇÃO PIX COPIA E COLA ---
+# --- FUNÇÃO PIX ---
 def gerar_payload_pix(valor, nome_recebedor, cidade_recebedor, chave_pix):
     valor_str = f"{valor:.2f}"
-    # Payload simplificado para Pix Estático
     payload = f"00020126330014BR.GOV.BCB.PIX0111{chave_pix}5204000053039865405{valor_str}5802BR59{len(nome_recebedor):02}{nome_recebedor}60{len(cidade_recebedor):02}{cidade_recebedor}62070503***6304"
     return payload
 
 # --- INTERFACE ---
 st.set_page_config(page_title="Inscrição SOESCA", page_icon="🎟️")
-st.markdown("# 🎟️ Ingresso: Palestra SOESCA")
-st.markdown("### SOESCA - Cabo de Santo Agostinho")
+st.markdown("# 🎟️ Inscrição: Palestra SOESCA")
+st.markdown("### SOESCA - Pernambuco")
 st.divider()
-
-col1, col2 = st.columns(2)
-col1.metric("Valor do Ingresso", "R$ 50,00")
-col2.metric("Vagas Totais", "140")
 
 with st.container(border=True):
     nome = st.text_input("Digite seu nome completo:")
@@ -48,14 +57,9 @@ with st.container(border=True):
             total = qtd * 50.00
             if salvar_na_planilha(nome, qtd, total):
                 st.success("✅ Inscrição registrada!")
-                
-                # Dados para o seu Pix
                 chave_celular = "81988037205"
                 payload = gerar_payload_pix(total, "JOAO FELIPE SILVA", "CABO", chave_celular)
                 
-                st.write(f"### Total: R$ {total:.2f}")
-                
-                # Gerar QR Code
                 qr = qrcode.QRCode(box_size=10, border=2)
                 qr.add_data(payload)
                 qr.make(fit=True)
@@ -63,8 +67,7 @@ with st.container(border=True):
                 
                 buf = BytesIO()
                 img.save(buf, format="PNG")
-                st.image(buf, caption="Aponte o app do Banco para pagar")
-                st.code(payload, language="text") # Opção Copia e Cola
-                st.info("Após pagar, envie o comprovante para o instrutor.")
+                st.image(buf, caption="Escaneie para pagar via Pix")
+                st.code(payload, language="text")
         else:
             st.warning("⚠️ Digite seu nome.")
