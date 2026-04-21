@@ -26,8 +26,8 @@ def salvar_na_planilha(nome, qtd, total):
 # --- INTERFACE VISUAL (Estilo WhatsApp) ---
 st.set_page_config(page_title="Inscrição SOESCA", page_icon="🎟️")
 
-st.markdown("# 🎟️ Inscrição: Palestra Técnica")
-st.markdown("### SOESCA - Pernambuco")
+st.markdown("# 🎟️ Ingresso: Palestra SOESCA")
+st.markdown("### SOESCA - Cabo de Santo Agostinho")
 st.divider()
 
 # Exibição de Valor e Vagas lado a lado
