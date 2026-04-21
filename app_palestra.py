@@ -45,7 +45,7 @@ def gerar_payload_pix(valor, nome_recebedor, cidade_recebedor, chave_pix):
 # --- INTERFACE ---
 st.set_page_config(page_title="Inscrição SOESCA", page_icon="🎟️")
 st.markdown("# 🎟️ Inscrição: Palestra SOESCA")
-st.markdown("### SOESCA - Pernambuco")
+st.markdown("### SOESCA - Cabo de Santo Agostinho")
 st.divider()
 
 with st.container(border=True):
