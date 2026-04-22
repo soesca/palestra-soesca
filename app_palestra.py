@@ -50,8 +50,7 @@ def contar_inscritos():
     try:
         planilha = conectar_planilha()
         dados = planilha.get_all_records()
-        total = sum(int(linha["Quantidade"]) for linha in dados)
-        return total
+        return sum(int(linha["Quantidade"]) for linha in dados)
     except:
         return 0
 
@@ -103,16 +102,36 @@ with st.container(border=True):
             st.write("### Escaneie para pagar via Pix")
             st.image(buf, caption=f"{nome} - Total: R$ {total:.2f}")
 
-            # 🔥 BOTÃO COPIAR PROFISSIONAL
+            # 🔥 BOTÃO COPIAR PROFISSIONAL COM FEEDBACK
             st.markdown("### 📋 Copiar código PIX")
 
-            st.markdown(f"""
-            <input type="text" value="{pix_copia_cola}" id="pixCode" style="width:100%; padding:10px; font-size:14px;" readonly>
-            <button onclick="navigator.clipboard.writeText(document.getElementById('pixCode').value)" 
-            style="margin-top:10px; padding:12px; background-color:#16a34a; color:white; border:none; border-radius:6px; width:100%; font-size:16px;">
-            📋 Copiar código PIX
-            </button>
-            """, unsafe_allow_html=True)
+            st.components.v1.html(f"""
+            <div style="width:100%">
+                <input id="pixInput" value="{pix_copia_cola}" 
+                style="width:100%; padding:12px; font-size:14px;" readonly />
+
+                <button onclick="copiarPix()" 
+                style="margin-top:10px; padding:12px; background:#16a34a; color:white; border:none; border-radius:6px; width:100%; font-size:16px;">
+                📋 Copiar código PIX
+                </button>
+
+                <p id="msg" style="color:#16a34a; display:none; margin-top:8px;">
+                ✅ Copiado com sucesso!
+                </p>
+            </div>
+
+            <script>
+            function copiarPix() {{
+                var copyText = document.getElementById("pixInput");
+                copyText.select();
+                copyText.setSelectionRange(0, 99999);
+
+                navigator.clipboard.writeText(copyText.value);
+
+                document.getElementById("msg").style.display = "block";
+            }}
+            </script>
+            """, height=150)
 
             st.info("💡 Após o pagamento, clique em 'Já paguei' abaixo.")
 
