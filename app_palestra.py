@@ -57,7 +57,7 @@ with st.container(border=True):
             total = qtd * 50.00
 
             # 🔑 COLE SEU PIX REAL AQUI
-            pix_copia_cola = "COLE_AQUI_SEU_PIX_REAL"
+            pix_copia_cola = "00020126360014br.gov.bcb.pix0114+558199818099152040000530398654041.005802BR5911FELIPE NETO6009Sao Paulo62230519daqr25819193077360763041A36"
 
             qr = qrcode.make(pix_copia_cola)
 
