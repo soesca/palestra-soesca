@@ -4,6 +4,13 @@ from io import BytesIO
 
 st.set_page_config(page_title="Inscrição SOESCA", page_icon="🎟️")
 
+# 🎯 LOGO CENTRALIZADA
+logo = "logo.png"
+
+col1, col2, col3 = st.columns([1,2,1])
+with col2:
+    st.image(logo, width=180)
+
 st.title("🎟️ Inscrição: Palestra SOESCA")
 st.subheader("SOESCA - Cabo de Santo Agostinho")
 st.divider()
@@ -19,7 +26,7 @@ with st.container(border=True):
 
             total = qtd * 50.00
 
-            # 🔑 COLE AQUI SEU PIX COPIA E COLA (GERADO NO BANCO)
+            # 🔑 COLE SEU PIX AQUI
             pix_copia_cola = "00020126360014br.gov.bcb.pix0114+558199818099152040000530398654041.005802BR5911FELIPE NETO6009Sao Paulo62230519daqr25819193077360763041A36"
 
             qr = qrcode.make(pix_copia_cola)
@@ -36,7 +43,7 @@ with st.container(border=True):
             st.markdown("---")
             st.code(pix_copia_cola)
 
-            st.info("💡 Após o pagamento, envie o comprovante para confirmação da inscrição.")
+            st.info("💡 Após o pagamento, envie o comprovante para confirmação.")
 
         else:
             st.warning("⚠️ Por favor, digite seu nome.")
