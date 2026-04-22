@@ -1,4 +1,5 @@
 streamlit
-qrcode
+mercadopago
 gspread
 oauth2client
+requests
