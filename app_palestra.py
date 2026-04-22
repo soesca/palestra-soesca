@@ -55,22 +55,25 @@ with st.container(border=True):
             total = qtd * 50.00
 
             # 🔥 CRIA PAGAMENTO PIX REAL
-            payment_data = {
-                "transaction_amount": float(total),
-                "description": f"Ingresso SOESCA - {nome}",
-                "payment_method_id": "pix",
-                "payer": {
-                    "email": "cliente@email.com"
-                }
-            }
+            import qrcode
+            from io import BytesIO
 
-            payment = sdk.payment().create(payment_data)
-            response = payment["response"]
+            # 🔑 COLE SEU PIX AQUI (copia e cola do banco)
+            pix_copia_cola = "00020126360014br.gov.bcb.pix0114+558199818099152040000530398654041.005802BR5911FELIPE NETO6009Sao Paulo62230519daqr25819193077360763041A36"  # <-- aqui entra o código REAL
 
-            # 🧾 DADOS PIX
-            qr_code = response["point_of_interaction"]["transaction_data"]["qr_code"]
-            qr_base64 = response["point_of_interaction"]["transaction_data"]["qr_code_base64"]
-            payment_id = response["id"]
+            qr = qrcode.make(pix_copia_cola)
+
+            buf = BytesIO()
+            qr.save(buf)
+            buf.seek(0)  # 👈 IMPORTANTE
+
+            st.success("PIX gerado com sucesso!")
+
+            st.write("### Escaneie para pagar via Pix")
+            st.image(buf)
+
+            st.markdown("---")
+            st.code(pix_copia_cola)
 
             # 💾 SALVA ID NA SESSÃO
             st.session_state["payment_id"] = payment_id
