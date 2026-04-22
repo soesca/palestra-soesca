@@ -89,8 +89,8 @@ with st.container(border=True):
         if nome:
             total = qtd * 50.00
             # Tenta salvar na planilha antes de mostrar o Pix
-            if salvar_na_planilha(nome, qtd, total):
-                st.success("✅ Inscrição registrada com sucesso na planilha!")
+            # if salvar_na_planilha(nome, qtd, total):
+            #     st.success("✅ Inscrição registrada com sucesso na planilha!")
                 
                 chave_celular = "81988037205"
                 payload = gerar_payload_pix(total, "JOAO FELIPE SILVA", "CABO", chave_celular)
