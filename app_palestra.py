@@ -92,7 +92,7 @@ with st.container(border=True):
             # if salvar_na_planilha(nome, qtd, total):
             #     st.success("✅ Inscrição registrada com sucesso na planilha!")
                 
-                chave_celular = "81988037205"
+            chave_celular = "81988037205"
                 payload = gerar_payload_pix(total, "JOAO FELIPE SILVA", "CABO", chave_celular)
                 
                 qr = qrcode.QRCode(box_size=10, border=2)
