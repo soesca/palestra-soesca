@@ -7,6 +7,9 @@ from datetime import datetime
 
 st.set_page_config(page_title="Inscrição SOESCA", page_icon="🎟️")
 
+# ---------------- CONFIG ----------------
+TOTAL_INGRESSOS = 140
+
 # ---------------- LOGO ----------------
 logo = "logo.png"
 col1, col2, col3 = st.columns([1,2,1])
@@ -18,55 +21,84 @@ st.subheader("SOESCA - Cabo de Santo Agostinho")
 st.divider()
 
 # ---------------- GOOGLE SHEETS ----------------
+def conectar_planilha():
+    escopo = [
+        "https://spreadsheets.google.com/feeds",
+        "https://www.googleapis.com/auth/drive"
+    ]
+
+    info = {
+        "type": st.secrets["google_sheets"]["type"],
+        "project_id": st.secrets["google_sheets"]["project_id"],
+        "private_key_id": st.secrets["google_sheets"]["private_key_id"],
+        "private_key": st.secrets["google_sheets"]["private_key"].replace("\\n", "\n"),
+        "client_email": st.secrets["google_sheets"]["client_email"],
+        "client_id": st.secrets["google_sheets"]["client_id"],
+        "auth_uri": st.secrets["google_sheets"]["auth_uri"],
+        "token_uri": st.secrets["google_sheets"]["token_uri"],
+        "auth_provider_x509_cert_url": st.secrets["google_sheets"]["auth_provider_x509_cert_url"],
+        "client_x509_cert_url": st.secrets["google_sheets"]["client_x509_cert_url"]
+    }
+
+    creds = ServiceAccountCredentials.from_json_keyfile_dict(info, escopo)
+    cliente = gspread.authorize(creds)
+
+    return cliente.open_by_key("1NHL4ihthnYOe_xDOGTmfLQ-I5FuyomWdTkkQbLRKKNs").sheet1
+
+
+def contar_inscritos():
+    try:
+        planilha = conectar_planilha()
+        dados = planilha.get_all_records()
+
+        total = sum(int(linha["Quantidade"]) for linha in dados)
+        return total
+
+    except:
+        return 0
+
+
 def salvar_na_planilha(nome, qtd, total):
     try:
-        escopo = [
-            "https://spreadsheets.google.com/feeds",
-            "https://www.googleapis.com/auth/drive"
-        ]
-
-        info = {
-            "type": st.secrets["google_sheets"]["type"],
-            "project_id": st.secrets["google_sheets"]["project_id"],
-            "private_key_id": st.secrets["google_sheets"]["private_key_id"],
-            "private_key": st.secrets["google_sheets"]["private_key"].replace("\\n", "\n"),
-            "client_email": st.secrets["google_sheets"]["client_email"],
-            "client_id": st.secrets["google_sheets"]["client_id"],
-            "auth_uri": st.secrets["google_sheets"]["auth_uri"],
-            "token_uri": st.secrets["google_sheets"]["token_uri"],
-            "auth_provider_x509_cert_url": st.secrets["google_sheets"]["auth_provider_x509_cert_url"],
-            "client_x509_cert_url": st.secrets["google_sheets"]["client_x509_cert_url"]
-        }
-
-        creds = ServiceAccountCredentials.from_json_keyfile_dict(info, escopo)
-        cliente = gspread.authorize(creds)
-
-        planilha = cliente.open_by_key("1NHL4ihthnYOe_xDOGTmfLQ-I5FuyomWdTkkQbLRKKNs").sheet1
-
+        planilha = conectar_planilha()
         data_hora = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
-        planilha.append_row([nome, qtd, data_hora, f"R$ {total:.2f}"])
 
+        planilha.append_row([nome, qtd, data_hora, f"R$ {total:.2f}"])
         return True
 
     except Exception as e:
-        st.error(f"Erro ao salvar na planilha: {e}")
+        st.error(f"Erro ao salvar: {e}")
         return False
 
+
+# ---------------- CONTADOR ----------------
+vendidos = contar_inscritos()
+restantes = TOTAL_INGRESSOS - vendidos
+
+if restantes <= 0:
+    st.error("❌ Ingressos esgotados!")
+    st.stop()
+
+st.info(f"🎟️ Restam {restantes} ingressos disponíveis")
 
 # ---------------- FORMULÁRIO ----------------
 with st.container(border=True):
 
     nome = st.text_input("Digite seu nome completo:")
-    qtd = st.number_input("Quantos ingressos deseja?", min_value=1, max_value=140, value=1)
+    qtd = st.number_input("Quantos ingressos deseja?", min_value=1, max_value=restantes, value=1)
 
     if st.button("Confirmar e Gerar Pix", use_container_width=True):
 
         if nome:
 
+            if qtd > restantes:
+                st.warning(f"⚠️ Só restam {restantes} ingressos")
+                st.stop()
+
             total = qtd * 50.00
 
             # 🔑 COLE SEU PIX REAL AQUI
-            pix_copia_cola = "COLE_AQUI_SEU_PIX_REAL"
+            pix_copia_cola = "00020126360014br.gov.bcb.pix0114+558199818099152040000530398654041.005802BR5911FELIPE NETO6009Sao Paulo62230519daqr25819193077360763041A36"
 
             qr = qrcode.make(pix_copia_cola)
 
@@ -82,10 +114,9 @@ with st.container(border=True):
             st.markdown("### 📋 Copiar código PIX")
             st.text_area("", pix_copia_cola, height=120)
 
-            st.info("👉 Segure o código acima e copie no seu banco.")
+            st.info("👉 Copie o código acima no seu banco.")
             st.info("💡 Após o pagamento, clique em 'Já paguei' abaixo.")
 
-            # salva dados
             st.session_state["nome"] = nome
             st.session_state["qtd"] = qtd
             st.session_state["total"] = total
@@ -95,7 +126,6 @@ with st.container(border=True):
 
 # ---------------- BOTÃO CLIENTE ----------------
 if st.button("Já paguei"):
-
     st.warning("Aguardando confirmação do administrador...")
     st.session_state["pagamento_pendente"] = True
 
@@ -116,7 +146,7 @@ if st.session_state.get("pagamento_pendente"):
                 st.session_state["qtd"],
                 st.session_state["total"]
             ):
-                st.success("✅ Pagamento confirmado e salvo na planilha!")
+                st.success("✅ Pagamento confirmado!")
                 st.balloons()
                 st.session_state["pagamento_pendente"] = False
 
