@@ -95,19 +95,19 @@ with st.container(border=True):
             chave_celular = "81988037205"
             payload = gerar_payload_pix(total, "JOAO FELIPE SILVA", "CABO", chave_celular)
                 
-                qr = qrcode.QRCode(box_size=10, border=2)
-                qr.add_data(payload)
-                qr.make(fit=True)
-                img = qr.make_image(fill_color="black", back_color="white")
+            qr = qrcode.QRCode(box_size=10, border=2)
+            qr.add_data(payload)
+            qr.make(fit=True)
+            img = qr.make_image(fill_color="black", back_color="white")
                 
-                buf = BytesIO()
-                img.save(buf, format="PNG")
+            buf = BytesIO()
+            img.save(buf, format="PNG")
                 
-                st.write("### Escaneie para pagar via Pix")
-                st.image(buf, caption=f"Pix para {nome} - Valor Total: R$ {total:.2f}")
+            st.write("### Escaneie para pagar via Pix")
+            st.image(buf, caption=f"Pix para {nome} - Valor Total: R$ {total:.2f}")
                 
-                st.markdown("---")
-                st.code(payload, language="text")
-                st.info("💡 Após escanear, confirme o valor de R$ 50,00 por ingresso e o nome JOAO FELIPE SILVA no seu app de banco.")
+            st.markdown("---")
+            st.code(payload, language="text")
+            st.info("💡 Após escanear, confirme o valor de R$ 50,00 por ingresso e o nome JOAO FELIPE SILVA no seu app de banco.")
         else:
             st.warning("⚠️ Por favor, digite seu nome.")
