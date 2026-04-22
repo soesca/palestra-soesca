@@ -6,10 +6,6 @@ import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 from datetime import datetime
 
-# 🔐 TOKEN MERCADO PAGO (coloque no secrets depois)
-ACCESS_TOKEN = st.secrets["mercado_pago"]["access_token"]
-
-sdk = mercadopago.SDK(ACCESS_TOKEN)
 
 # ---------------- GOOGLE SHEETS ----------------
 def salvar_na_planilha(nome, qtd, total):
