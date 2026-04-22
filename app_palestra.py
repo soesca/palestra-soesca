@@ -4,13 +4,11 @@ from io import BytesIO
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 from datetime import datetime
-import json
 
 st.set_page_config(page_title="Inscrição SOESCA", page_icon="🎟️")
 
-# 🎯 LOGO CENTRALIZADA
+# ---------------- LOGO ----------------
 logo = "logo.png"
-
 col1, col2, col3 = st.columns([1,2,1])
 with col2:
     st.image(logo, width=180)
@@ -27,7 +25,18 @@ def salvar_na_planilha(nome, qtd, total):
             "https://www.googleapis.com/auth/drive"
         ]
 
-        info = json.loads(st.secrets["google_sheets"]["json_key"])
+        info = {
+            "type": st.secrets["google_sheets"]["type"],
+            "project_id": st.secrets["google_sheets"]["project_id"],
+            "private_key_id": st.secrets["google_sheets"]["private_key_id"],
+            "private_key": st.secrets["google_sheets"]["private_key"].replace("\\n", "\n"),
+            "client_email": st.secrets["google_sheets"]["client_email"],
+            "client_id": st.secrets["google_sheets"]["client_id"],
+            "auth_uri": st.secrets["google_sheets"]["auth_uri"],
+            "token_uri": st.secrets["google_sheets"]["token_uri"],
+            "auth_provider_x509_cert_url": st.secrets["google_sheets"]["auth_provider_x509_cert_url"],
+            "client_x509_cert_url": st.secrets["google_sheets"]["client_x509_cert_url"]
+        }
 
         creds = ServiceAccountCredentials.from_json_keyfile_dict(info, escopo)
         cliente = gspread.authorize(creds)
@@ -57,7 +66,7 @@ with st.container(border=True):
             total = qtd * 50.00
 
             # 🔑 COLE SEU PIX REAL AQUI
-            pix_copia_cola = "00020126360014br.gov.bcb.pix0114+558199818099152040000530398654041.005802BR5911FELIPE NETO6009Sao Paulo62230519daqr25819193077360763041A36"
+            pix_copia_cola = "COLE_AQUI_SEU_PIX_REAL"
 
             qr = qrcode.make(pix_copia_cola)
 
@@ -70,12 +79,13 @@ with st.container(border=True):
             st.write("### Escaneie para pagar via Pix")
             st.image(buf, caption=f"{nome} - Total: R$ {total:.2f}")
 
-            st.markdown("---")
-            st.code(pix_copia_cola)
+            st.markdown("### 📋 Copiar código PIX")
+            st.text_area("", pix_copia_cola, height=120)
 
+            st.info("👉 Segure o código acima e copie no seu banco.")
             st.info("💡 Após o pagamento, clique em 'Já paguei' abaixo.")
 
-            # salva dados na sessão
+            # salva dados
             st.session_state["nome"] = nome
             st.session_state["qtd"] = qtd
             st.session_state["total"] = total
@@ -87,11 +97,10 @@ with st.container(border=True):
 if st.button("Já paguei"):
 
     st.warning("Aguardando confirmação do administrador...")
-
     st.session_state["pagamento_pendente"] = True
 
 
-# ---------------- ÁREA ADMIN ----------------
+# ---------------- ADMIN ----------------
 if st.session_state.get("pagamento_pendente"):
 
     st.markdown("### 🔐 Confirmação do administrador")
@@ -100,7 +109,7 @@ if st.session_state.get("pagamento_pendente"):
 
     if st.button("Confirmar pagamento"):
 
-        if senha == "soesca2026":  # 🔑 ALTERE SE QUISER
+        if senha == "soesca2026":
 
             if salvar_na_planilha(
                 st.session_state["nome"],
@@ -109,7 +118,6 @@ if st.session_state.get("pagamento_pendente"):
             ):
                 st.success("✅ Pagamento confirmado e salvo na planilha!")
                 st.balloons()
-
                 st.session_state["pagamento_pendente"] = False
 
         else:
