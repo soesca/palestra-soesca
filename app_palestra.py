@@ -50,10 +50,8 @@ def contar_inscritos():
     try:
         planilha = conectar_planilha()
         dados = planilha.get_all_records()
-
         total = sum(int(linha["Quantidade"]) for linha in dados)
         return total
-
     except:
         return 0
 
@@ -62,10 +60,8 @@ def salvar_na_planilha(nome, qtd, total):
     try:
         planilha = conectar_planilha()
         data_hora = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
-
         planilha.append_row([nome, qtd, data_hora, f"R$ {total:.2f}"])
         return True
-
     except Exception as e:
         st.error(f"Erro ao salvar: {e}")
         return False
@@ -91,10 +87,6 @@ with st.container(border=True):
 
         if nome:
 
-            if qtd > restantes:
-                st.warning(f"⚠️ Só restam {restantes} ingressos")
-                st.stop()
-
             total = qtd * 50.00
 
             # 🔑 COLE SEU PIX REAL AQUI
@@ -111,10 +103,17 @@ with st.container(border=True):
             st.write("### Escaneie para pagar via Pix")
             st.image(buf, caption=f"{nome} - Total: R$ {total:.2f}")
 
+            # 🔥 BOTÃO COPIAR PROFISSIONAL
             st.markdown("### 📋 Copiar código PIX")
-            st.text_area("", pix_copia_cola, height=120)
 
-            st.info("👉 Copie o código acima no seu banco.")
+            st.markdown(f"""
+            <input type="text" value="{pix_copia_cola}" id="pixCode" style="width:100%; padding:10px; font-size:14px;" readonly>
+            <button onclick="navigator.clipboard.writeText(document.getElementById('pixCode').value)" 
+            style="margin-top:10px; padding:12px; background-color:#16a34a; color:white; border:none; border-radius:6px; width:100%; font-size:16px;">
+            📋 Copiar código PIX
+            </button>
+            """, unsafe_allow_html=True)
+
             st.info("💡 Após o pagamento, clique em 'Já paguei' abaixo.")
 
             st.session_state["nome"] = nome
